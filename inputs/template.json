@@ -1,12 +1,24 @@
 {
   "pageDimensions": [707, 484],
   "bubbleDimensions": [15, 10],
+
+  "preProcessors": [
+    {
+      "name": "FeatureBasedAlignment",
+      "options": {
+        "reference": "templates.jpg",
+        "maxFeatures": 500,
+        "goodMatchPercent": 0.15
+      }
+    }
+  ],
+  "customLabels": {},
   "fieldBlocks": {
     "Column1": {
       "fieldType": "QTYPE_MCQ4",
-      "origin": [82, 35],
+      "origin": [62, 187],
       "bubblesGap": 21,
-      "labelsGap": 22.7,
+      "labelsGap": 13.8,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q1",
@@ -33,9 +45,9 @@
     },
     "Column2": {
       "fieldType": "QTYPE_MCQ4",
-      "origin": [205, 35],
+      "origin": [187, 187],
       "bubblesGap": 21,
-      "labelsGap": 22.7,
+      "labelsGap": 13.8,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q21",
@@ -62,9 +74,9 @@
     },
     "Column3": {
       "fieldType": "QTYPE_MCQ4",
-      "origin": [327, 35],
-      "bubblesGap": 21,
-      "labelsGap": 22.7,
+      "origin": [317, 187],
+      "bubblesGap": 23.5,
+      "labelsGap": 13.8,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q41",
@@ -91,9 +103,9 @@
     },
     "Column4": {
       "fieldType": "QTYPE_MCQ4",
-      "origin": [450, 35],
-      "bubblesGap": 21,
-      "labelsGap": 22.7,
+      "origin": [450, 187],
+      "bubblesGap": 25.5,
+      "labelsGap": 13.8,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q61",
@@ -120,9 +132,9 @@
     },
     "Column5": {
       "fieldType": "QTYPE_MCQ4",
-      "origin": [573, 35],
-      "bubblesGap": 21,
-      "labelsGap": 22.7,
+      "origin": [582, 187],
+      "bubblesGap": 25.5,
+      "labelsGap": 13.8,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q81",

@@ -4,8 +4,9 @@
 !.github/
 
 # Everything in inputs/ and outputs/
-inputs/*
+# inputs/*
 outputs/*
+omr-scanner-app/
 
 # Misc
 **/.DS_Store

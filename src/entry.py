@@ -181,23 +181,19 @@ def process_dir(
 
 
 def show_template_layouts(omr_files, template, tuning_config):
-    # Import here to avoid circular imports
-    from src.utils.interactive_layout_editor import launch_interactive_editor
-    
-    if len(omr_files) > 0:
-        # Use the first image as background for the interactive editor
-        image_path = omr_files[0]
-        logger.info(f"Launching Interactive Layout Editor with image: {image_path}")
-        logger.info("Instructions:")
-        logger.info("- Click and drag field blocks to move them")
-        logger.info("- Press 'S' to save changes to template.json")
-        logger.info("- Press 'R' to reset to original positions")
-        logger.info("- Press 'Q' to quit the editor")
-        launch_interactive_editor(template.path, image_path)
-    else:
-        # No images available, launch with blank background
-        logger.info("No images found, launching Interactive Layout Editor with blank background")
-        launch_interactive_editor(template.path, None)
+    for file_path in omr_files:
+        file_name = file_path.name
+        file_path = str(file_path)
+        in_omr = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+        in_omr = template.image_instance_ops.apply_preprocessors(
+            file_path, in_omr, template
+        )
+        template_layout = template.image_instance_ops.draw_template_layout(
+            in_omr, template, shifted=False, border=2
+        )
+        InteractionUtils.show(
+            f"Template Layout: {file_name}", template_layout, 1, 1, config=tuning_config
+        )
 
 
 def process_files(
