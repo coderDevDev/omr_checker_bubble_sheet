@@ -11,11 +11,11 @@ gunicorn==21.2.0
 
 # Image processing
 opencv-python==4.8.1.78
-Pillow==10.1.0
+Pillow>=11.0.0  # Python 3.13 compatible version
 
 # Data processing
-numpy==1.24.3
-pandas==2.0.3
+numpy>=1.26.0  # Python 3.13 compatible
+pandas>=2.1.0  # Python 3.13 compatible
 
 # Core OMR dependencies (from requirements.txt)
 deepmerge>=1.1.0
