@@ -1,24 +1,15 @@
 {
-  "pageDimensions": [707, 484],
-  "bubbleDimensions": [15, 10],
+  "pageDimensions": [2560, 1440],
+  "bubbleDimensions": [40, 40],
 
-  "preProcessors": [
-    {
-      "name": "FeatureBasedAlignment",
-      "options": {
-        "reference": "templates.jpg",
-        "maxFeatures": 500,
-        "goodMatchPercent": 0.15
-      }
-    }
-  ],
+  "preProcessors": [],
   "customLabels": {},
   "fieldBlocks": {
     "Column1": {
       "fieldType": "QTYPE_MCQ4",
-      "origin": [62, 187],
-      "bubblesGap": 21,
-      "labelsGap": 13.8,
+      "origin": [130, 18],
+      "bubblesGap": 77,
+      "labelsGap": 72,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q1",
@@ -44,10 +35,10 @@
       ]
     },
     "Column2": {
-      "fieldType": "QTYPE_MCQ4",
-      "origin": [187, 187],
-      "bubblesGap": 21,
-      "labelsGap": 13.8,
+       "fieldType": "QTYPE_MCQ4",
+      "origin": [625, 18],
+      "bubblesGap": 77,
+      "labelsGap": 72,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q21",
@@ -74,9 +65,9 @@
     },
     "Column3": {
       "fieldType": "QTYPE_MCQ4",
-      "origin": [317, 187],
-      "bubblesGap": 23.5,
-      "labelsGap": 13.8,
+      "origin": [1120, 18],
+      "bubblesGap": 95,
+      "labelsGap": 72,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q41",
@@ -101,11 +92,11 @@
         "Q60"
       ]
     },
-    "Column4": {
+    "Column4": {    
       "fieldType": "QTYPE_MCQ4",
-      "origin": [450, 187],
-      "bubblesGap": 25.5,
-      "labelsGap": 13.8,
+      "origin": [1670, 18],
+      "bubblesGap": 95,
+      "labelsGap": 72,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q61",
@@ -132,9 +123,9 @@
     },
     "Column5": {
       "fieldType": "QTYPE_MCQ4",
-      "origin": [582, 187],
-      "bubblesGap": 25.5,
-      "labelsGap": 13.8,
+      "origin": [2180, 18],
+      "bubblesGap": 95,
+      "labelsGap": 72,
       "bubbleCount": 20,
       "fieldLabels": [
         "Q81",
@@ -159,6 +150,7 @@
         "Q100"
       ]
     }
+ 
   },
 
   "emptyValue": "-"

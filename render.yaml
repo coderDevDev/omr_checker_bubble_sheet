@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: omr-scanner-api
+    runtime: python
+    plan: free  # Options: free, starter, standard, pro
+    buildCommand: pip install -r requirements_production.txt
+    startCommand: gunicorn api_server:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_ENV
+        value: production
+      # PORT is automatically set by Render, no need to configure
+    disk:
+      name: omr-scanner-disk
+      mountPath: /opt/render/project/src/temp_uploads
+      sizeGB: 1
+
