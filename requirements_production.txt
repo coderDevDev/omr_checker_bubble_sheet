@@ -6,13 +6,11 @@ Werkzeug==3.0.1
 # Production WSGI server
 gunicorn==21.2.0
 
-# Force NumPy 1.x (to avoid OpenCV crash)
+# NumPy & Pandas compatible with each other and Python 3.11
 numpy==1.26.4
-
-# Pandas version compatible with NumPy 1.x
 pandas==2.1.4
 
-# Image processing
+# Image processing (headless version for servers)
 opencv-python-headless==4.8.1.78
 Pillow==11.0.0
 
@@ -24,5 +22,6 @@ jsonschema>=4.17.3
 # Matplotlib version compatible with NumPy 1.x
 matplotlib==3.7.3
 
+# Other utilities
 rich>=13.4.2
 screeninfo>=0.8.1
