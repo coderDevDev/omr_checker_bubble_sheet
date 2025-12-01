@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "OMR Scanner",
+    "slug": "omr-scanner",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to camera to scan OMR sheets",
+        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to save captured images"
+      }
+    },
+    "android": {
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan OMR sheets"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to save captured images",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos to your device",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
+    ]
+  }
+}

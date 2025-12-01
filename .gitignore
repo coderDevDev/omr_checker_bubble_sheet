@@ -6,7 +6,7 @@
 # Everything in inputs/ and outputs/
 inputs/*
 outputs/*
-omr-scanner-app/*
+omr-scanner-app/node_modules
 
 # Misc
 **/.DS_Store
