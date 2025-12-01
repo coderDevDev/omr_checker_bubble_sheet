@@ -34,6 +34,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      ["./plugins/fix-kotlin-target"],
       [
         "expo-camera",
         {
@@ -46,12 +47,6 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to save captured images",
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos to your device",
           "isAccessMediaLocationEnabled": true
-        }
-      ],
-      [
-        "react-native-document-scanner-plugin",
-        {
-          "cameraPermission": "We need camera access, so you can scan documents"
         }
       ]
     ],

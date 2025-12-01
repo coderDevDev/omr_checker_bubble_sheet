@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 // Import our screens
 import HomeScreen from './src/screens/HomeScreen';
 import CameraOverlayScreen from './src/screens/CameraOverlayScreen';
+import DocumentExtractionScreen from './src/screens/DocumentExtractionScreen';
 import RectanglePreviewScreen from './src/screens/RectanglePreviewScreen';
 import ResultsScreen from './src/screens/ResultsScreen';
 import TemplateScreen from './src/screens/TemplateScreen';
@@ -49,6 +50,14 @@ export default function App() {
               options={{
                 title: 'Camera Overlay',
                 headerShown: false // Hide header for full-screen camera
+              }}
+            />
+            <Stack.Screen
+              name="DocumentExtraction"
+              component={DocumentExtractionScreen}
+              options={{
+                title: 'Extracting Document',
+                headerShown: false
               }}
             />
             <Stack.Screen

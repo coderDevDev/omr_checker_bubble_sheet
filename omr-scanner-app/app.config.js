@@ -30,10 +30,7 @@ module.exports = {
         'android.permission.READ_MEDIA_VIDEO',
         'android.permission.READ_MEDIA_AUDIO'
       ],
-      package: 'com.dexter_20.omrscanner',
-      compileSdkVersion: 34,
-      targetSdkVersion: 34,
-      minSdkVersion: 21
+      package: 'com.dexter_20.omrscanner'
     },
     web: {
       favicon: './assets/favicon.png'
@@ -57,10 +54,8 @@ module.exports = {
         }
       ],
       // Custom plugin to fix JVM target compatibility
-      [
-        './plugins/withJvmTarget.js',
-        {}
-      ]
+      ['./plugins/withJvmTarget.js', {}],
+      ['expo-font']
     ],
     extra: {
       eas: {
