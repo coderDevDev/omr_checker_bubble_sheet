@@ -1,21 +1,38 @@
 from dataclasses import dataclass
+import os
 
 import cv2
-from screeninfo import get_monitors
 
 from src.logger import logger
 from src.utils.image import ImageUtils
 
-monitor_window = get_monitors()[0]
+# ------------------------------
+# Headless-safe monitor detection
+# ------------------------------
+try:
+    from screeninfo import get_monitors, ScreenInfoError
+
+    monitor_window = get_monitors()[0] if get_monitors() else None
+except (ImportError, ScreenInfoError):
+    monitor_window = None
+
+# Fallback dimensions if no monitor is detected
+DEFAULT_WIDTH, DEFAULT_HEIGHT = 1920, 1080
+window_width = monitor_window.width if monitor_window else DEFAULT_WIDTH
+window_height = monitor_window.height if monitor_window else DEFAULT_HEIGHT
 
 
 @dataclass
 class ImageMetrics:
-    # TODO: Move TEXT_SIZE, etc here and find a better class name
-    window_width, window_height = monitor_window.width, monitor_window.height
-    # for positioning image windows
-    window_x, window_y = 0, 0
-    reset_pos = [0, 0]
+    window_width: int = window_width
+    window_height: int = window_height
+    window_x: int = 0
+    window_y: int = 0
+    reset_pos: list = None
+
+    def __post_init__(self):
+        if self.reset_pos is None:
+            self.reset_pos = [0, 0]
 
 
 class InteractionUtils:
@@ -25,6 +42,11 @@ class InteractionUtils:
 
     @staticmethod
     def show(name, origin, pause=1, resize=False, reset_pos=None, config=None):
+        if monitor_window is None:
+            # Headless mode: skip showing windows
+            logger.info(f"Skipping display of '{name}' in headless mode.")
+            return
+
         image_metrics = InteractionUtils.image_metrics
         if origin is None:
             logger.info(f"'{name}' - NoneType image to show!")
@@ -47,11 +69,7 @@ class InteractionUtils:
             image_metrics.window_x = reset_pos[0]
             image_metrics.window_y = reset_pos[1]
 
-        cv2.moveWindow(
-            name,
-            image_metrics.window_x,
-            image_metrics.window_y,
-        )
+        cv2.moveWindow(name, image_metrics.window_x, image_metrics.window_y)
 
         h, w = img.shape[:2]
 
@@ -74,7 +92,6 @@ class InteractionUtils:
             logger.info(
                 f"Showing '{name}'\n\t Press Q on image to continue. Press Ctrl + C in terminal to exit"
             )
-
             wait_q()
             InteractionUtils.image_metrics.window_x = 0
             InteractionUtils.image_metrics.window_y = 0
@@ -82,12 +99,8 @@ class InteractionUtils:
 
 @dataclass
 class Stats:
-    # TODO Fill these for stats
-    # Move qbox_vals here?
-    # badThresholds = []
-    # veryBadPoints = []
-    files_moved = 0
-    files_not_moved = 0
+    files_moved: int = 0
+    files_not_moved: int = 0
 
 
 def wait_q():
@@ -102,6 +115,3 @@ def is_window_available(name: str) -> bool:
     try:
         cv2.getWindowProperty(name, cv2.WND_PROP_VISIBLE)
         return True
-    except Exception as e:
-        print(e)
-        return False
