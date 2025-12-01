@@ -12,7 +12,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 const API_CONFIG = {
   // Change this to your computer's local IP address
   // Find your IP: Windows (ipconfig), Mac/Linux (ifconfig)
-  BASE_URL: 'http://192.168.0.192:5000/api', // UPDATE THIS!
+  BASE_URL: 'https://omr-scanner-api.onrender.com/api', // UPDATE THIS!
 
   // Endpoints
   ENDPOINTS: {
@@ -295,10 +295,10 @@ export const getAvailableTemplates = async () => {
 export const saveMarkedImage = async (base64Image, filename = 'marked.jpg') => {
   try {
     const fileUri = `${FileSystem.documentDirectory}${filename}`;
-    
+
     // Remove data URI prefix if present
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-    
+
     await FileSystem.writeAsStringAsync(fileUri, base64Data, {
       encoding: 'base64'
     });
@@ -366,11 +366,11 @@ export const testApiConnection = async () => {
 
 /**
  * Detect rectangles in image using crop_answer_area.py
- * 
+ *
  * @param {string} imageUri - Local file URI of the captured image
  * @returns {Promise<Object>} Detection results with images
  */
-export const detectRectangles = async (imageUri) => {
+export const detectRectangles = async imageUri => {
   try {
     console.log('Detecting rectangles in image:', imageUri);
 

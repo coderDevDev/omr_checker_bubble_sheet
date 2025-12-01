@@ -5,7 +5,6 @@
     "version": "1.0.0",
     "orientation": "default",
     "userInterfaceStyle": "light",
-
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
@@ -18,8 +17,18 @@
       "permissions": [
         "CAMERA",
         "WRITE_EXTERNAL_STORAGE",
-        "READ_EXTERNAL_STORAGE"
-      ]
+        "READ_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
+      ],
+      "package": "com.dexter_20.omrscanner"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -38,7 +47,18 @@
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos to your device",
           "isAccessMediaLocationEnabled": true
         }
+      ],
+      [
+        "react-native-document-scanner-plugin",
+        {
+          "cameraPermission": "We need camera access, so you can scan documents"
+        }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4874707d-e6ad-43d2-8555-674f6155e018"
+      }
+    }
   }
 }

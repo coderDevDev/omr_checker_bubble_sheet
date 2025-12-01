@@ -15,6 +15,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as MediaLibrary from 'expo-media-library';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
+// Conditionally import document scanner (may not be available in all builds)
+let DocumentScanner = null;
+try {
+  DocumentScanner = require('react-native-document-scanner-plugin');
+} catch (error) {
+  console.warn('Document scanner plugin not available:', error.message);
+}
+
 const getScreenDimensions = () => {
   const { width, height } = Dimensions.get('window');
   return { width, height };
@@ -28,7 +36,12 @@ export default function CameraOverlayScreen({ navigation, route }) {
   const [capturing, setCapturing] = useState(false);
   const [overlayDimensions, setOverlayDimensions] = useState(null);
   const [flashMode, setFlashMode] = useState('off');
-  const [screenDimensions, setScreenDimensions] = useState(getScreenDimensions());
+  const [useDocumentScanner, setUseDocumentScanner] = useState(
+    DocumentScanner !== null
+  ); // Enable only if available
+  const [screenDimensions, setScreenDimensions] = useState(
+    getScreenDimensions()
+  );
 
   useEffect(() => {
     getPermissions();
@@ -51,14 +64,17 @@ export default function CameraOverlayScreen({ navigation, route }) {
   const getPermissions = async () => {
     try {
       console.log('Requesting camera permissions...');
-      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+      const { status: cameraStatus } =
+        await Camera.requestCameraPermissionsAsync();
       console.log('Camera permission status:', cameraStatus);
 
       try {
         const mediaPermission = await MediaLibrary.requestPermissionsAsync();
         console.log('Media library permission status:', mediaPermission.status);
       } catch (mediaError) {
-        console.log('Media library permission not available in Expo Go (this is OK)');
+        console.log(
+          'Media library permission not available in Expo Go (this is OK)'
+        );
       }
 
       if (cameraStatus !== 'granted') {
@@ -91,7 +107,10 @@ export default function CameraOverlayScreen({ navigation, route }) {
     const isLandscape = screenWidth > screenHeight;
 
     const pageDim = Array.isArray(template.pageDimensions)
-      ? { width: template.pageDimensions[0], height: template.pageDimensions[1] }
+      ? {
+          width: template.pageDimensions[0],
+          height: template.pageDimensions[1]
+        }
       : template.pageDimensions;
 
     const pageWidth = pageDim.width || 1200;
@@ -123,7 +142,7 @@ export default function CameraOverlayScreen({ navigation, route }) {
     setOverlayDimensions(dimensions);
   };
 
-  const cropImageToOverlay = async (imageUri) => {
+  const cropImageToOverlay = async imageUri => {
     try {
       if (!overlayDimensions) {
         console.log('⚠️ No overlay dimensions, skipping crop');
@@ -131,17 +150,19 @@ export default function CameraOverlayScreen({ navigation, route }) {
       }
 
       // Get the actual image dimensions using React Native Image.getSize
-      const { width: imageWidth, height: imageHeight } = await new Promise((resolve) => {
-        Image.getSize(
-          imageUri,
-          (width, height) => resolve({ width, height }),
-          (error) => {
-            console.warn('Could not get image size:', error);
-            // Fallback: assume high-res camera (most phones)
-            resolve({ width: 3024, height: 4032 });
-          }
-        );
-      });
+      const { width: imageWidth, height: imageHeight } = await new Promise(
+        resolve => {
+          Image.getSize(
+            imageUri,
+            (width, height) => resolve({ width, height }),
+            error => {
+              console.warn('Could not get image size:', error);
+              // Fallback: assume high-res camera (most phones)
+              resolve({ width: 3024, height: 4032 });
+            }
+          );
+        }
+      );
 
       const { x, y, width, height } = overlayDimensions;
       const { width: screenWidth, height: screenHeight } = screenDimensions;
@@ -177,17 +198,43 @@ export default function CameraOverlayScreen({ navigation, route }) {
       // Convert overlay coordinates to image coordinates
       const cropX = Math.max(0, Math.round(overlayRelX * scaleX));
       const cropY = Math.max(0, Math.round(overlayRelY * scaleY));
-      const cropWidth = Math.min(imageWidth - cropX, Math.round(width * scaleX));
-      const cropHeight = Math.min(imageHeight - cropY, Math.round(height * scaleY));
+      const cropWidth = Math.min(
+        imageWidth - cropX,
+        Math.round(width * scaleX)
+      );
+      const cropHeight = Math.min(
+        imageHeight - cropY,
+        Math.round(height * scaleY)
+      );
 
       console.log('✂️ Cropping to green frame:');
-      console.log(`  Screen: ${screenWidth}x${screenHeight} (aspect: ${screenAspect.toFixed(2)})`);
-      console.log(`  Image: ${imageWidth}x${imageHeight} (aspect: ${imageAspect.toFixed(2)})`);
-      console.log(`  Preview area: ${previewWidth.toFixed(0)}x${previewHeight.toFixed(0)} at (${previewX.toFixed(0)}, ${previewY.toFixed(0)})`);
-      console.log(`  Overlay on screen: x=${x}, y=${y}, w=${width}, h=${height}`);
-      console.log(`  Overlay relative to preview: x=${overlayRelX.toFixed(0)}, y=${overlayRelY.toFixed(0)}`);
+      console.log(
+        `  Screen: ${screenWidth}x${screenHeight} (aspect: ${screenAspect.toFixed(
+          2
+        )})`
+      );
+      console.log(
+        `  Image: ${imageWidth}x${imageHeight} (aspect: ${imageAspect.toFixed(
+          2
+        )})`
+      );
+      console.log(
+        `  Preview area: ${previewWidth.toFixed(0)}x${previewHeight.toFixed(
+          0
+        )} at (${previewX.toFixed(0)}, ${previewY.toFixed(0)})`
+      );
+      console.log(
+        `  Overlay on screen: x=${x}, y=${y}, w=${width}, h=${height}`
+      );
+      console.log(
+        `  Overlay relative to preview: x=${overlayRelX.toFixed(
+          0
+        )}, y=${overlayRelY.toFixed(0)}`
+      );
       console.log(`  Scale: x=${scaleX.toFixed(2)}, y=${scaleY.toFixed(2)}`);
-      console.log(`  Crop region: x=${cropX}, y=${cropY}, w=${cropWidth}, h=${cropHeight}`);
+      console.log(
+        `  Crop region: x=${cropX}, y=${cropY}, w=${cropWidth}, h=${cropHeight}`
+      );
 
       // Validate crop dimensions
       if (cropWidth <= 0 || cropHeight <= 0 || cropX < 0 || cropY < 0) {
@@ -217,6 +264,85 @@ export default function CameraOverlayScreen({ navigation, route }) {
       console.error('❌ Crop error:', error);
       // Return original image if crop fails
       return imageUri;
+    }
+  };
+
+  const capturePhotoWithDocumentScanner = async () => {
+    // Check if document scanner is available
+    if (!DocumentScanner) {
+      Alert.alert(
+        'Document Scanner Not Available',
+        'Document scanner is not available in this build. Using manual capture instead.',
+        [{ text: 'OK', onPress: () => capturePhoto() }]
+      );
+      return;
+    }
+
+    try {
+      setCapturing(true);
+      console.log('📄 Starting document scanner...');
+
+      // Use document scanner plugin for automatic detection
+      const scannedDocument = await DocumentScanner.scan({
+        croppedImageQuality: 100,
+        letUserAdjustCrop: false, // Auto-crop without user adjustment
+        maxNumDocuments: 1
+      });
+
+      if (
+        scannedDocument &&
+        scannedDocument.scannedImages &&
+        scannedDocument.scannedImages.length > 0
+      ) {
+        const scannedImageUri = scannedDocument.scannedImages[0];
+        console.log('✅ Document scanned:', scannedImageUri);
+
+        let assetId = null;
+        try {
+          const asset = await MediaLibrary.createAssetAsync(scannedImageUri);
+          assetId = asset.id;
+          console.log('💾 Saved to gallery');
+        } catch (saveError) {
+          console.log('Could not save to gallery (Expo Go limitation)');
+        }
+
+        // Navigate to Rectangle Preview with scanned document
+        navigation.navigate('RectanglePreview', {
+          imageUri: scannedImageUri,
+          originalUri: scannedImageUri,
+          template,
+          templateInfo,
+          assetId: assetId,
+          preCropEnabled: true,
+          answerKey: answerKey,
+          isDocumentScanned: true // Flag to indicate document scanner was used
+        });
+      } else {
+        throw new Error('No document detected');
+      }
+    } catch (error) {
+      console.error('Document scanner error:', error);
+
+      // Fallback to regular camera capture
+      Alert.alert(
+        'Document Detection Failed',
+        'Could not detect document automatically. Falling back to manual capture.',
+        [
+          {
+            text: 'Use Manual Capture',
+            onPress: () => {
+              setUseDocumentScanner(false);
+              capturePhoto();
+            }
+          },
+          {
+            text: 'Try Again',
+            onPress: () => capturePhotoWithDocumentScanner()
+          }
+        ]
+      );
+    } finally {
+      setCapturing(false);
     }
   };
 
@@ -253,14 +379,25 @@ export default function CameraOverlayScreen({ navigation, route }) {
         template,
         templateInfo,
         assetId: assetId,
-        preCropEnabled: ENABLE_PRE_CROP,
+        preCropEnabled: true,
         answerKey: answerKey
       });
     } catch (error) {
       console.error('Capture error:', error);
-      Alert.alert('Capture Failed', 'Failed to capture image. Please try again.');
+      Alert.alert(
+        'Capture Failed',
+        'Failed to capture image. Please try again.'
+      );
     } finally {
       setCapturing(false);
+    }
+  };
+
+  const handleCapture = () => {
+    if (useDocumentScanner) {
+      capturePhotoWithDocumentScanner();
+    } else {
+      capturePhoto();
     }
   };
 
@@ -272,8 +409,13 @@ export default function CameraOverlayScreen({ navigation, route }) {
     return (
       <SafeAreaView style={styles.permissionContainer}>
         <ActivityIndicator size="large" color="#2E7D32" />
-        <Text style={styles.permissionText}>Requesting camera permission...</Text>
-        <Button mode="outlined" onPress={() => navigation.goBack()} style={{ marginTop: 20 }}>
+        <Text style={styles.permissionText}>
+          Requesting camera permission...
+        </Text>
+        <Button
+          mode="outlined"
+          onPress={() => navigation.goBack()}
+          style={{ marginTop: 20 }}>
           Cancel
         </Button>
       </SafeAreaView>
@@ -284,8 +426,13 @@ export default function CameraOverlayScreen({ navigation, route }) {
     return (
       <SafeAreaView style={styles.permissionContainer}>
         <Text style={styles.permissionTitle}>Camera Access Required</Text>
-        <Text style={styles.permissionText}>This app needs camera access to scan OMR sheets.</Text>
-        <Button mode="contained" onPress={() => navigation.goBack()} style={{ marginTop: 20 }}>
+        <Text style={styles.permissionText}>
+          This app needs camera access to scan OMR sheets.
+        </Text>
+        <Button
+          mode="contained"
+          onPress={() => navigation.goBack()}
+          style={{ marginTop: 20 }}>
           Go Back
         </Button>
       </SafeAreaView>
@@ -329,28 +476,44 @@ export default function CameraOverlayScreen({ navigation, route }) {
             {/* Capture Guidelines */}
             <View style={styles.guideTextContainer}>
               <Text style={styles.guideText}>📄 ALIGN SHEET TO FRAME</Text>
-              <Text style={styles.guideSubtext}>Follow guidelines for best results</Text>
+              <Text style={styles.guideSubtext}>
+                Follow guidelines for best results
+              </Text>
             </View>
 
             {/* Capture Instructions */}
             <View style={styles.instructionsContainer}>
               <Text style={styles.instructionText}>💡 Capture Guidelines</Text>
-              <Text style={styles.instructionSubtext}>✓ Good lighting (no shadows)</Text>
-              <Text style={styles.instructionSubtext}>✓ Hold 30-40cm above paper</Text>
-              <Text style={styles.instructionSubtext}>✓ Keep camera parallel to sheet</Text>
-              <Text style={styles.instructionSubtext}>✓ All 4 corners visible in frame</Text>
+              <Text style={styles.instructionSubtext}>
+                ✓ Good lighting (no shadows)
+              </Text>
+              <Text style={styles.instructionSubtext}>
+                ✓ Hold 30-40cm above paper
+              </Text>
+              <Text style={styles.instructionSubtext}>
+                ✓ Keep camera parallel to sheet
+              </Text>
+              <Text style={styles.instructionSubtext}>
+                ✓ All 4 corners visible in frame
+              </Text>
             </View>
 
             {/* Controls */}
             <View style={styles.controlsContainer}>
               {/* Top Controls */}
               <View style={styles.topControls}>
-                <TouchableOpacity style={styles.controlButton} onPress={() => navigation.goBack()}>
+                <TouchableOpacity
+                  style={styles.controlButton}
+                  onPress={() => navigation.goBack()}>
                   <Text style={styles.controlText}>✕</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.controlButton} onPress={toggleFlash}>
-                  <Text style={styles.controlText}>{flashMode === 'off' ? '⚡' : '⚡️'}</Text>
+                <TouchableOpacity
+                  style={styles.controlButton}
+                  onPress={toggleFlash}>
+                  <Text style={styles.controlText}>
+                    {flashMode === 'off' ? '⚡' : '⚡️'}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -358,8 +521,11 @@ export default function CameraOverlayScreen({ navigation, route }) {
               <View style={styles.bottomControls}>
                 <View style={styles.captureButtonContainer}>
                   <TouchableOpacity
-                    style={[styles.captureButton, capturing && styles.captureButtonDisabled]}
-                    onPress={capturePhoto}
+                    style={[
+                      styles.captureButton,
+                      capturing && styles.captureButtonDisabled
+                    ]}
+                    onPress={handleCapture}
                     disabled={capturing || !cameraReady}>
                     {capturing ? (
                       <ActivityIndicator size="small" color="#FFFFFF" />
@@ -367,6 +533,19 @@ export default function CameraOverlayScreen({ navigation, route }) {
                       <View style={styles.captureButtonInner} />
                     )}
                   </TouchableOpacity>
+
+                  {/* Toggle between document scanner and manual capture - Only show if scanner is available */}
+                  {DocumentScanner && (
+                    <TouchableOpacity
+                      style={styles.scannerToggle}
+                      onPress={() =>
+                        setUseDocumentScanner(!useDocumentScanner)
+                      }>
+                      <Text style={styles.scannerToggleText}>
+                        {useDocumentScanner ? '📄 Auto-Detect' : '📸 Manual'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             </View>
@@ -571,5 +750,18 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     backgroundColor: '#2E7D32'
+  },
+  scannerToggle: {
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 20,
+    alignSelf: 'center'
+  },
+  scannerToggleText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold'
   }
 });

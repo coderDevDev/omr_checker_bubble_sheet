@@ -1,17 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Card, Title, Paragraph, Button, IconButton } from 'react-native-paper';
+import {
+  Card,
+  Title,
+  Paragraph,
+  Button,
+  IconButton,
+  Switch,
+  Divider
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import { getSettings, saveSettings } from '../services/database';
 
 export default function HomeScreen({ navigation }) {
   const [uploading, setUploading] = useState(false);
+  const [skipVerifyDetection, setSkipVerifyDetection] = useState(true);
+  const [showDevSettings, setShowDevSettings] = useState(false);
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const settings = await getSettings();
+      setSkipVerifyDetection(settings.skipVerifyDetection !== false);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
+
+  const handleToggleSkipVerify = async value => {
+    setSkipVerifyDetection(value);
+    try {
+      const settings = await getSettings();
+      await saveSettings({
+        ...settings,
+        skipVerifyDetection: value
+      });
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    }
+  };
 
   const handleUploadImage = async () => {
     try {
       // Request media library permissions
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
       if (status !== 'granted') {
         Alert.alert(
           'Permission Required',
@@ -55,9 +93,9 @@ export default function HomeScreen({ navigation }) {
         <Card style={styles.welcomeCard}>
           <Card.Content>
             <Title style={styles.welcomeTitle}>🎯 OMR Scanner</Title>
-            <Paragraph style={styles.welcomeText}>
-              Professional Optical Mark Recognition with Camera Overlay
-            </Paragraph>
+            {/* <Paragraph style={styles.welcomeText}>
+              Professional Optical Mark Recognition
+            </Paragraph> */}
           </Card.Content>
         </Card>
 
@@ -75,7 +113,7 @@ export default function HomeScreen({ navigation }) {
               icon="camera">
               Start Camera Overlay
             </Button>
-            <Button
+            {/* <Button
               mode="outlined"
               style={styles.uploadButton}
               onPress={handleUploadImage}
@@ -83,7 +121,7 @@ export default function HomeScreen({ navigation }) {
               loading={uploading}
               disabled={uploading}>
               Upload Image from Gallery
-            </Button>
+            </Button> */}
           </Card.Content>
         </Card>
 
@@ -104,8 +142,52 @@ export default function HomeScreen({ navigation }) {
           </Card.Content>
         </Card>
 
+        {/* Developer Settings (Collapsible) */}
+        <Card style={styles.devSettingsCard}>
+          <Card.Content>
+            <View style={styles.devSettingsHeader}>
+              <View>
+                <Title style={styles.devSettingsTitle}>
+                  ⚙️ Developer Settings
+                </Title>
+                <Paragraph style={styles.devSettingsSubtitle}>
+                  Advanced options for development and testing
+                </Paragraph>
+              </View>
+              <IconButton
+                icon={showDevSettings ? 'chevron-up' : 'chevron-down'}
+                size={24}
+                onPress={() => setShowDevSettings(!showDevSettings)}
+              />
+            </View>
+
+            {showDevSettings && (
+              <>
+                <Divider style={styles.divider} />
+                <View style={styles.settingRow}>
+                  <View style={styles.settingInfo}>
+                    <Paragraph style={styles.settingTitle}>
+                      Skip Verify Detection Screen
+                    </Paragraph>
+                    <Paragraph style={styles.settingDescription}>
+                      When enabled, uploaded images go directly to Results
+                      screen. Disable to show Verify Detection screen for
+                      debugging.
+                    </Paragraph>
+                  </View>
+                  <Switch
+                    value={skipVerifyDetection}
+                    onValueChange={handleToggleSkipVerify}
+                    color="#2E7D32"
+                  />
+                </View>
+              </>
+            )}
+          </Card.Content>
+        </Card>
+
         {/* Features */}
-        <Card style={styles.featureCard}>
+        {/* <Card style={styles.featureCard}>
           <Card.Content>
             <Title style={styles.sectionTitle}>✨ Features</Title>
 
@@ -161,10 +243,10 @@ export default function HomeScreen({ navigation }) {
               </View>
             </View>
           </Card.Content>
-        </Card>
+        </Card> */}
 
         {/* Instructions */}
-        <Card style={styles.instructionCard}>
+        {/* <Card style={styles.instructionCard}>
           <Card.Content>
             <Title style={styles.sectionTitle}>📋 How to Use</Title>
             <Paragraph style={styles.instructionText}>
@@ -175,7 +257,7 @@ export default function HomeScreen({ navigation }) {
               5. View instant results
             </Paragraph>
           </Card.Content>
-        </Card>
+        </Card> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -270,5 +352,50 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4A4A4A',
     lineHeight: 20
+  },
+  devSettingsCard: {
+    marginTop: 16,
+    backgroundColor: '#F5F5F5',
+    borderLeftWidth: 4,
+    borderLeftColor: '#9E9E9E'
+  },
+  devSettingsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  devSettingsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#666666'
+  },
+  devSettingsSubtitle: {
+    fontSize: 12,
+    color: '#888888',
+    marginTop: 4
+  },
+  divider: {
+    marginVertical: 12
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8
+  },
+  settingInfo: {
+    flex: 1,
+    marginRight: 16
+  },
+  settingTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 4
+  },
+  settingDescription: {
+    fontSize: 12,
+    color: '#666666',
+    lineHeight: 16
   }
 });

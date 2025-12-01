@@ -21,7 +21,16 @@ import apiService from '../services/apiService';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function RectanglePreviewScreen({ navigation, route }) {
-  const { imageUri, originalUri, template, templateInfo, assetId, preCropEnabled, answerKey } = route.params;
+  const {
+    imageUri,
+    originalUri,
+    template,
+    templateInfo,
+    assetId,
+    preCropEnabled,
+    answerKey,
+    skipToResults
+  } = route.params;
   const [detecting, setDetecting] = useState(true);
   const [detectedImageUri, setDetectedImageUri] = useState(null);
   const [croppedImageUri, setCroppedImageUri] = useState(null);
@@ -31,6 +40,17 @@ export default function RectanglePreviewScreen({ navigation, route }) {
   useEffect(() => {
     detectRectangles();
   }, []);
+
+  // Auto-proceed to Results if skipToResults is true
+  useEffect(() => {
+    if (skipToResults && croppedImageUri && !detecting && !error) {
+      // Small delay to ensure state is updated
+      const timer = setTimeout(() => {
+        handleProceed();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [skipToResults, croppedImageUri, detecting, error]);
 
   const detectRectangles = async () => {
     try {
@@ -61,7 +81,7 @@ export default function RectanglePreviewScreen({ navigation, route }) {
 
       // Set the images from backend
       setDetectedImageUri(data.detected_image_uri); // rectangles_detected_fixed.jpg
-      setCroppedImageUri(data.cropped_image_uri);   // answer_section.jpg
+      setCroppedImageUri(data.cropped_image_uri); // answer_section.jpg
 
       setDetecting(false);
     } catch (err) {
@@ -112,15 +132,25 @@ export default function RectanglePreviewScreen({ navigation, route }) {
           <IconButton icon="alert-circle" size={60} iconColor="#D32F2F" />
           <Text style={styles.errorTitle}>Detection Failed</Text>
           <Text style={styles.errorText}>{error}</Text>
-          
+
           <Card style={styles.tipsCard}>
             <Card.Content>
-              <Text style={styles.tipsTitle}>💡 Tips to Improve Detection:</Text>
-              <Text style={styles.tipText}>• Ensure better lighting (avoid shadows)</Text>
+              <Text style={styles.tipsTitle}>
+                💡 Tips to Improve Detection:
+              </Text>
+              <Text style={styles.tipText}>
+                • Ensure better lighting (avoid shadows)
+              </Text>
               <Text style={styles.tipText}>• Use higher resolution camera</Text>
-              <Text style={styles.tipText}>• Make sure answer section has clear borders</Text>
-              <Text style={styles.tipText}>• Place paper on contrasting background</Text>
-              <Text style={styles.tipText}>• Hold camera 30-40cm above paper</Text>
+              <Text style={styles.tipText}>
+                • Make sure answer section has clear borders
+              </Text>
+              <Text style={styles.tipText}>
+                • Place paper on contrasting background
+              </Text>
+              <Text style={styles.tipText}>
+                • Hold camera 30-40cm above paper
+              </Text>
             </Card.Content>
           </Card>
 
@@ -149,7 +179,9 @@ export default function RectanglePreviewScreen({ navigation, route }) {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Surface style={styles.header}>
           <Text style={styles.headerTitle}>✅ Detection Successful!</Text>
-          <Text style={styles.headerSubtitle}>Verify the detected answer section below</Text>
+          <Text style={styles.headerSubtitle}>
+            Verify the detected answer section below
+          </Text>
         </Surface>
 
         {/* Captured Image */}
@@ -160,8 +192,8 @@ export default function RectanglePreviewScreen({ navigation, route }) {
                 {preCropEnabled ? '📐 Pre-Cropped Image' : '📸 Captured Image'}
               </Text>
               <Text style={styles.imageSubtitle}>
-                {preCropEnabled 
-                  ? 'Image cropped to green frame area' 
+                {preCropEnabled
+                  ? 'Image cropped to green frame area'
                   : 'Original captured image (full frame)'}
               </Text>
               <Image
@@ -170,7 +202,9 @@ export default function RectanglePreviewScreen({ navigation, route }) {
                 resizeMode="contain"
               />
               {preCropEnabled && originalUri && (
-                <Text style={styles.imageNote}>✂️ Cropped from original capture</Text>
+                <Text style={styles.imageNote}>
+                  ✂️ Cropped from original capture
+                </Text>
               )}
             </Card.Content>
           </Card>
@@ -183,7 +217,9 @@ export default function RectanglePreviewScreen({ navigation, route }) {
                 <Card.Content>
                   <Text style={styles.warningTitle}>⚠️ Warnings:</Text>
                   {detectionInfo.warnings.map((warning, index) => (
-                    <Text key={index} style={styles.warningText}>• {warning}</Text>
+                    <Text key={index} style={styles.warningText}>
+                      • {warning}
+                    </Text>
                   ))}
                 </Card.Content>
               </Card>
@@ -194,19 +230,27 @@ export default function RectanglePreviewScreen({ navigation, route }) {
                 <Text style={styles.infoTitle}>📊 Detection Results</Text>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Rectangles Found:</Text>
-                  <Text style={styles.infoValue}>{detectionInfo.rectanglesFound}</Text>
+                  <Text style={styles.infoValue}>
+                    {detectionInfo.rectanglesFound}
+                  </Text>
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Image Resolution:</Text>
-                  <Text style={styles.infoValue}>{detectionInfo.imageQuality.resolution}</Text>
+                  <Text style={styles.infoValue}>
+                    {detectionInfo.imageQuality.resolution}
+                  </Text>
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Brightness:</Text>
-                  <Text style={styles.infoValue}>{detectionInfo.imageQuality.brightness}</Text>
+                  <Text style={styles.infoValue}>
+                    {detectionInfo.imageQuality.brightness}
+                  </Text>
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Sharpness:</Text>
-                  <Text style={styles.infoValue}>{detectionInfo.imageQuality.sharpness}</Text>
+                  <Text style={styles.infoValue}>
+                    {detectionInfo.imageQuality.sharpness}
+                  </Text>
                 </View>
               </Card.Content>
             </Card>
@@ -217,7 +261,9 @@ export default function RectanglePreviewScreen({ navigation, route }) {
           <Card style={styles.imageCard}>
             <Card.Content>
               <Text style={styles.imageTitle}>🔍 Detected Rectangles</Text>
-              <Text style={styles.imageSubtitle}>Green box shows detected answer section</Text>
+              <Text style={styles.imageSubtitle}>
+                Green box shows detected answer section
+              </Text>
               <Image
                 source={{ uri: detectedImageUri }}
                 style={styles.previewImage}
@@ -231,7 +277,9 @@ export default function RectanglePreviewScreen({ navigation, route }) {
           <Card style={styles.imageCard}>
             <Card.Content>
               <Text style={styles.imageTitle}>✂️ Cropped Answer Section</Text>
-              <Text style={styles.imageSubtitle}>This will be processed for OMR scanning</Text>
+              <Text style={styles.imageSubtitle}>
+                This will be processed for OMR scanning
+              </Text>
               <Image
                 source={{ uri: croppedImageUri }}
                 style={styles.previewImage}
@@ -242,7 +290,9 @@ export default function RectanglePreviewScreen({ navigation, route }) {
         )}
 
         <View style={styles.actionContainer}>
-          <Text style={styles.actionText}>Does the detection look correct?</Text>
+          <Text style={styles.actionText}>
+            Does the detection look correct?
+          </Text>
           <View style={styles.buttonRow}>
             <Button
               mode="outlined"

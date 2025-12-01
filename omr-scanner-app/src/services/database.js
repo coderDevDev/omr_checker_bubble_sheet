@@ -1,6 +1,6 @@
 /**
  * Database Service
- * 
+ *
  * Handles local storage for answer keys, students, results, and classes
  * Uses AsyncStorage for persistence
  */
@@ -21,7 +21,7 @@ const KEYS = {
 /**
  * Save an answer key
  */
-export const saveAnswerKey = async (answerKey) => {
+export const saveAnswerKey = async answerKey => {
   try {
     const existing = await getAllAnswerKeys();
     const updated = [...existing.filter(k => k.id !== answerKey.id), answerKey];
@@ -49,7 +49,7 @@ export const getAllAnswerKeys = async () => {
 /**
  * Get answer key by ID
  */
-export const getAnswerKeyById = async (id) => {
+export const getAnswerKeyById = async id => {
   try {
     const keys = await getAllAnswerKeys();
     return keys.find(k => k.id === id) || null;
@@ -62,7 +62,7 @@ export const getAnswerKeyById = async (id) => {
 /**
  * Delete answer key
  */
-export const deleteAnswerKey = async (id) => {
+export const deleteAnswerKey = async id => {
   try {
     const existing = await getAllAnswerKeys();
     const updated = existing.filter(k => k.id !== id);
@@ -79,7 +79,7 @@ export const deleteAnswerKey = async (id) => {
 /**
  * Save a student
  */
-export const saveStudent = async (student) => {
+export const saveStudent = async student => {
   try {
     const existing = await getAllStudents();
     const updated = [...existing.filter(s => s.id !== student.id), student];
@@ -107,7 +107,7 @@ export const getAllStudents = async () => {
 /**
  * Get student by ID
  */
-export const getStudentById = async (id) => {
+export const getStudentById = async id => {
   try {
     const students = await getAllStudents();
     return students.find(s => s.id === id) || null;
@@ -120,7 +120,7 @@ export const getStudentById = async (id) => {
 /**
  * Get students by class
  */
-export const getStudentsByClass = async (classId) => {
+export const getStudentsByClass = async classId => {
   try {
     const students = await getAllStudents();
     return students.filter(s => s.classId === classId);
@@ -133,7 +133,7 @@ export const getStudentsByClass = async (classId) => {
 /**
  * Delete student
  */
-export const deleteStudent = async (id) => {
+export const deleteStudent = async id => {
   try {
     const existing = await getAllStudents();
     const updated = existing.filter(s => s.id !== id);
@@ -150,7 +150,7 @@ export const deleteStudent = async (id) => {
 /**
  * Save a class
  */
-export const saveClass = async (classData) => {
+export const saveClass = async classData => {
   try {
     const existing = await getAllClasses();
     const updated = [...existing.filter(c => c.id !== classData.id), classData];
@@ -178,7 +178,7 @@ export const getAllClasses = async () => {
 /**
  * Get class by ID
  */
-export const getClassById = async (id) => {
+export const getClassById = async id => {
   try {
     const classes = await getAllClasses();
     return classes.find(c => c.id === id) || null;
@@ -191,7 +191,7 @@ export const getClassById = async (id) => {
 /**
  * Delete class
  */
-export const deleteClass = async (id) => {
+export const deleteClass = async id => {
   try {
     const existing = await getAllClasses();
     const updated = existing.filter(c => c.id !== id);
@@ -208,7 +208,7 @@ export const deleteClass = async (id) => {
 /**
  * Save exam result
  */
-export const saveResult = async (result) => {
+export const saveResult = async result => {
   try {
     const existing = await getAllResults();
     const updated = [...existing.filter(r => r.id !== result.id), result];
@@ -236,7 +236,7 @@ export const getAllResults = async () => {
 /**
  * Get results by student ID
  */
-export const getResultsByStudent = async (studentId) => {
+export const getResultsByStudent = async studentId => {
   try {
     const results = await getAllResults();
     return results.filter(r => r.studentId === studentId);
@@ -249,7 +249,7 @@ export const getResultsByStudent = async (studentId) => {
 /**
  * Get results by answer key ID
  */
-export const getResultsByAnswerKey = async (answerKeyId) => {
+export const getResultsByAnswerKey = async answerKeyId => {
   try {
     const results = await getAllResults();
     return results.filter(r => r.answerKeyId === answerKeyId);
@@ -262,7 +262,7 @@ export const getResultsByAnswerKey = async (answerKeyId) => {
 /**
  * Get results by class ID
  */
-export const getResultsByClass = async (classId) => {
+export const getResultsByClass = async classId => {
   try {
     const students = await getStudentsByClass(classId);
     const studentIds = students.map(s => s.id);
@@ -277,7 +277,7 @@ export const getResultsByClass = async (classId) => {
 /**
  * Delete result
  */
-export const deleteResult = async (id) => {
+export const deleteResult = async id => {
   try {
     const existing = await getAllResults();
     const updated = existing.filter(r => r.id !== id);
@@ -294,7 +294,7 @@ export const deleteResult = async (id) => {
 /**
  * Save settings
  */
-export const saveSettings = async (settings) => {
+export const saveSettings = async settings => {
   try {
     await AsyncStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
     return { success: true };
@@ -324,6 +324,7 @@ const getDefaultSettings = () => ({
   negativeMarking: false,
   negativeMarkValue: 0.25,
   passingPercentage: 40,
+  skipVerifyDetection: true, // Skip Verify Detection screen for faster workflow
   gradingScale: {
     A: 90,
     B: 80,
@@ -358,14 +359,15 @@ export const clearAllData = async () => {
  */
 export const exportAllData = async () => {
   try {
-    const [answerKeys, students, classes, results, settings] = await Promise.all([
-      getAllAnswerKeys(),
-      getAllStudents(),
-      getAllClasses(),
-      getAllResults(),
-      getSettings()
-    ]);
-    
+    const [answerKeys, students, classes, results, settings] =
+      await Promise.all([
+        getAllAnswerKeys(),
+        getAllStudents(),
+        getAllClasses(),
+        getAllResults(),
+        getSettings()
+      ]);
+
     return {
       success: true,
       data: {
@@ -386,10 +388,13 @@ export const exportAllData = async () => {
 /**
  * Import all data
  */
-export const importAllData = async (data) => {
+export const importAllData = async data => {
   try {
     if (data.answerKeys) {
-      await AsyncStorage.setItem(KEYS.ANSWER_KEYS, JSON.stringify(data.answerKeys));
+      await AsyncStorage.setItem(
+        KEYS.ANSWER_KEYS,
+        JSON.stringify(data.answerKeys)
+      );
     }
     if (data.students) {
       await AsyncStorage.setItem(KEYS.STUDENTS, JSON.stringify(data.students));
@@ -403,7 +408,7 @@ export const importAllData = async (data) => {
     if (data.settings) {
       await AsyncStorage.setItem(KEYS.SETTINGS, JSON.stringify(data.settings));
     }
-    
+
     return { success: true };
   } catch (error) {
     console.error('Error importing data:', error);
@@ -417,20 +422,20 @@ export default {
   getAllAnswerKeys,
   getAnswerKeyById,
   deleteAnswerKey,
-  
+
   // Students
   saveStudent,
   getAllStudents,
   getStudentById,
   getStudentsByClass,
   deleteStudent,
-  
+
   // Classes
   saveClass,
   getAllClasses,
   getClassById,
   deleteClass,
-  
+
   // Results
   saveResult,
   getAllResults,
@@ -438,11 +443,11 @@ export default {
   getResultsByAnswerKey,
   getResultsByClass,
   deleteResult,
-  
+
   // Settings
   saveSettings,
   getSettings,
-  
+
   // Utility
   clearAllData,
   exportAllData,
