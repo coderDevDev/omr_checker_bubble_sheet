@@ -7,8 +7,9 @@ Werkzeug==3.0.1
 gunicorn==21.2.0
 
 # NumPy & Pandas compatible with each other and Python 3.11
-numpy==1.26.4
-pandas==2.1.4
+numpy>=2.1.0
+pandas>=2.2.2
+
 
 # Image processing (headless version for servers)
 opencv-python-headless==4.8.1.78
