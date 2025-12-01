@@ -115,3 +115,8 @@ def is_window_available(name: str) -> bool:
     try:
         cv2.getWindowProperty(name, cv2.WND_PROP_VISIBLE)
         return True
+    except Exception as e:
+        # optional: log the error instead of printing
+        logger.warning(f"Window check failed for '{name}': {e}")
+        return False
+
